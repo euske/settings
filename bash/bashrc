@@ -1,0 +1,10 @@
+#
+HOST_COLOR=${HOST_COLOR:-green}
+MYHISTFILE=${MYHISTFILE:-$HOME/.bash_myhistory}
+. $HOME/lib/bash/bashrc_common
+
+PATH=$HOME/bin:$PATH
+if [[ -z "$DISPLAY" ]]; then
+  function xs { cd; exec startx; };
+fi
+
