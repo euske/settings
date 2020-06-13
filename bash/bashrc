@@ -1,10 +1,18 @@
-#
+# -*- shell-script -*-
+# .bashrc
+
+# Do nothing if not interactive.
+[[ -z "$PS1" ]] && return
+
 HOST_COLOR=${HOST_COLOR:-green}
 MYHISTFILE=${MYHISTFILE:-$HOME/.bash_myhistory}
-. $HOME/lib/bash/bashrc_common
+. $HOME/lib/bash/bashrc_minimum.sh
+. $HOME/lib/bash/bashrc_common.sh
+. $HOME/lib/bash/cdhist.sh
 
-PATH=$HOME/bin:$PATH
+PATH=$HOME/bin:$HOME/.local/bin:$PATH
+export LC_CTYPE=en_US.UTF-8
+
 if [[ -z "$DISPLAY" ]]; then
-  function xs { cd; exec startx; };
+  function xs { cd; exec startx; }
 fi
-

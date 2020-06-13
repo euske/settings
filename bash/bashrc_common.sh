@@ -1,20 +1,20 @@
-##  .bashrc for euske
+# -*- shell-script -*-
 ##
+##  Extended .bashrc for euske
+##
+
+# Do nothing if not interactive.
 [[ -z "$PS1" ]] && return
 
-# invoke minimum settings
-. $HOME/lib/bash/bashrc_minimum
-
-# Interactive mode
-
 # PATH
+PATH=~/bin:~/bin/python:$PATH
 PATH=$PATH:/usr/local/bin:/usr/local/sbin:/usr/sbin:/sbin
 
-# Shell options (override)
+# Shell options (overrided).
 HISTSIZE=${HISTSIZE:-100000}
 HISTFILESIZE=${HISTFILESIZE:-100000}
 
-# Env vars
+# Environment variables.
 if [ -x /usr/bin/vim ]; then
     export EDITOR=vim
 fi
@@ -28,12 +28,13 @@ export PYTHONSTARTUP=$HOME/lib/python/pythonrc.py
 export PYTHONIOENCODING=utf-8
 export LYNX_CFG=$HOME/lib/rc/lynx.cfg
 export LYNX_LSS=$HOME/lib/rc/lynx.lss
+export CMAP_PATH=$HOME/lib/python/pdfminer/cmap
 export RSYNC_BACKUP_BASE='.old'
 export RSYNC_PATTERN
 RSYNC_PATTERN='--exclude NOBACKUP/ --exclude INACTIVE/ --exclude LOCAL/ --exclude local/ --exclude tmp/'
 RSYNC_PATTERN=$RSYNC_PATTERN' --include *.obj --include *.Z --exclude *.o'
 
-# Terminal setting
+# Terminal settings.
 if [ "linux" = "$TERM" ]; then
     echo -en '\e]P0000000' # black
     echo -en '\e]P1ff4500' # orangered
@@ -53,7 +54,20 @@ if [ "linux" = "$TERM" ]; then
     echo -en '\e]PFdedede' # lightgray
 fi
 
-# Prompt setting
+# Prompt settings.
+function set_prompt_color {
+    case "$1" in
+        red*) col=31;;
+        green*) col=32;;
+        yellow*) col=33;;
+        blue*) col=34;;
+        pink*) col=35;;
+        cyan*) col=36;;
+        *) col=1;;
+    esac
+    PSS="\t $HOSTNAME:\[\e[${col}m\]\W[\!]\$\[\e[m\] "
+    PS1="\t $HOSTNAME\[\e[${col}m\]\w[\!]\$\[\e[m\] "
+}
 function screen_status {
     if [[ "screen" = "$TERM" ]]; then echo -en "\033k$HOSTNAME:$1\033\0134"; fi
 }
@@ -78,46 +92,32 @@ function end_history {
 	echo "`date '+%Y-%m-%d %H:%M:%S'` $HOSTNAME:$$ $PWD (end)" >> $MYHISTFILE
     fi
 }
-if [[ "$MYHISTFILE" ]]; then
-    echo "`date '+%Y-%m-%d %H:%M:%S'` $HOSTNAME:$$ $PWD (start)" >> $MYHISTFILE
-    trap end_history EXIT
-fi
+function start_history {
+    if [[ "$MYHISTFILE" ]]; then
+        echo "`date '+%Y-%m-%d %H:%M:%S'` $HOSTNAME:$$ $PWD (start)" >> $MYHISTFILE
+        trap end_history EXIT
+    fi
+}
+
+set_prompt_color $HOST_COLOR
+start_history
 PROMPT_COMMAND=prompt_cmd
 
-case "$HOST_COLOR" in
-    red*) col=31;;
-    green*) col=32;;
-    yellow*) col=33;;
-    blue*) col=34;;
-    pink*) col=35;;
-    cyan*) col=36;;
-    *) col=1;;
-esac
+# Convenient functions.
 
-PSS="\t $HOSTNAME:\[\e[${col}m\]\W[\!]\$\[\e[m\] "
-PS1="\t $HOSTNAME\[\e[${col}m\]\w[\!]\$\[\e[m\] "
-
-# Funcitons
-# cd
-. ~/lib/bash/cdhist.sh
-
-# grep
-function listcodes { command tf c cc C cpp h H hpp sh py el java cs as js ts rc jsp; }
-function listtexts { command tf txt html htm tex texi xml css; }
-function GG { listcodes | xargs grep "$@"; }
-function gg { listcodes | xargs grep -i "$@"; }
-function gt { listtexts | xargs grep -i "$@"; }
-
-# ssh & rsync
-function scp2 { sshon && command scp "$@"; }
-function ssh2 { sshon && command ssh "$@"; }
-function sftp2 { sshon && command sftp "$@"; }
-
-# misc.
-function xargsn { xargs -d '\n' "$@"; }
-function px { local tmp=$PS1; PS1=$PSS; PSS=$tmp; }
-function e { unset PROMPT_COMMAND; HOST_COLOR=$HOST_COLOR command emacs -nw "$@"; }
-function i { if [ "$1" ]; then grep "$@" $MYHISTFILE; else tail -100 $MYHISTFILE; fi }
+# px: swap the short/long prompts.
+function px {
+    local tmp=$PS1; PS1=$PSS; PSS=$tmp;
+}
+# i: show or search the local history.
+function i {
+    if [ "$1" ]; then
+        grep "$@" $MYHISTFILE
+    else
+        tail -100 $MYHISTFILE
+    fi
+}
+# wi: show the command.
 function wi {
     case `type -t "$1"` in
 	alias|function) type "$1";;
