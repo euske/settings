@@ -83,6 +83,13 @@ function l {
         ${PAGER:-less} "$@"
     fi
 }
+# ff: find with some filters.
+function ff {
+    local path=${1:-.}
+    shift
+    find "$path" \
+         '(' -name '.?*' -o -name CVS -o -name tmp ')' -prune -false -o -type f "$@"
+}
 # f: find files by name (case insensitive)
 function f {
     if [ ! "$1" ]; then
@@ -99,10 +106,9 @@ function F {
         n="*$1*"; shift; find . "$@" -name "$n"
     fi
 }
-FIND_PATTERN='( -name .git -o -name .svn -o -name CVS -o -name tmp ) -prune -false -o -type f'
 # listcodes: enumerate source codes.
 function listcodes {
-    find "${1:-.}" $FIND_PATTERN '(' \
+    ff "${1:-.}" '(' \
          -name '*.c' -o -name '*.cc' -o -name '*.C' -o -name '*.cpp' -o \
          -name '*.h' -o -name '*.H' -o -name '*.hpp' -o \
          -name '*.sh' -o -name '*.rc' -o -name '*.py' -o -name '*.el' -o \
@@ -112,10 +118,10 @@ function listcodes {
 }
 # listtexts: enumerate text files.
 function listtexts {
-    find "${1:-.}" $FIND_PATTERN '(' \
-         -name '*.txt' -o \
+    ff "${1:-.}" '(' \
+         -name '*.txt' -o -name '*.md' -o \
          -name '*.html' -o -name '*.htm' -o -name '*.css' -o \
-         -name '*.xml' -o -name '*.svg' \
+         -name '*.xml' -o -name '*.svg' -o \
          -name '*.tex' -o -name '*.texi' \
          ')';
 }
