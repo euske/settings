@@ -82,7 +82,7 @@ function log_history {
 }
 function prompt_cmd {
     local s=$?
-    show_exit $s; 
+    show_exit $s;
     log_history $s;
     screen_status "${PWD##/*/}"
 }
@@ -117,12 +117,3 @@ function i {
         tail -100 $MYHISTFILE
     fi
 }
-# wi: show the command.
-function wi {
-    case `type -t "$1"` in
-	alias|function) type "$1";;
-	file) lt `command -v "$1"`;;
-	function) type "$1";;
-    esac
-}
-complete -c wi
