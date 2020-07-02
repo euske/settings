@@ -1,5 +1,5 @@
 ;; -*- coding: utf-8 -*-
-;; .emacs 21,22,23,24,25 for euske
+;; .emacs 26 for euske
 
 
 ;; Added by Package.el.  This must come before configurations of
@@ -37,28 +37,27 @@
     (defun display-window-title () (interactive) (change-screen-title "Emacs"))
     (add-hook 'suspend-resume-hook (function display-window-title))
     (display-window-title)
-    (set-face-foreground 'mode-line (getenv "PROMPT_COLOR"))
+    (set-face-foreground 'mode-line (getenv "HOST_COLOR"))
     ))
 
 
 ;;  General
 ;;
 (put 'eval-expression 'disabled nil)
-(prefer-coding-system 'utf-8)
+(prefer-coding-system 'utf-8-dos)
 (add-to-list 'load-path "~/lib/emacs")
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 (setq-default indent-tabs-mode nil)
 (setq next-line-add-newlines nil
       font-lock-maximum-decoration t
       inhibit-startup-message t
-      require-final-newline  t
+      require-final-newline t
       auto-save-list-file-prefix nil
-      suggest-key-bindings   nil
+      suggest-key-bindings nil
       dired-listing-switches "-ao"
-;      scroll-conservatively  1
-      default-buffer-file-coding-system 'utf-8
-      make-backup-files      nil
-;      dired-guess-shell-alist-user '(("\\.wav$" "aplay"))
+;      scroll-conservatively 1
+      create-lockfiles nil
+      make-backup-files nil
       )
 
 
@@ -86,8 +85,21 @@
 (defun euc () (interactive) (set-buffer-file-coding-system 'euc-jp-unix))
 (defun jis () (interactive) (set-buffer-file-coding-system 'iso-2022-jp-unix))
 (defun sjis () (interactive) (set-buffer-file-coding-system 'sjis-dos))
-(defun dos () (interactive) (set-buffer-file-coding-system 'utf-8-with-signature-dos))
 (defun utf () (interactive) (set-buffer-file-coding-system 'utf-8-unix))
+(defun dos () (interactive) (set-buffer-file-coding-system 'utf-8-with-signature-dos))
+
+
+;;  tabs-spaces
+;;
+(defun untabify-at-save ()
+       (save-excursion
+         (goto-char (point-min))
+         (while (re-search-forward "[ \t]+$" nil t)
+           (delete-region (match-beginning 0) (match-end 0)))
+         (goto-char (point-min))
+         (if (search-forward "\t" nil t)
+             (untabify (1- (point)) (point-max))))
+       nil)
 
 
 ;;  Japanese input method
@@ -115,7 +127,7 @@
 (add-to-list 'c-default-style '(c-mode . "stroustrup"))
 (add-to-list 'c-default-style '(c++-mode . "stroustrup"))
 (add-to-list 'c-default-style '(objc-mode . "stroustrup"))
-(add-to-list 'c-default-style '(java-mode . "java"))
+(add-to-list 'c-default-style '(java-mode . "me"))
 
 
 ;;  C#
@@ -134,10 +146,12 @@
                ))
 
 
-;;  AS3
+;;  Java
 ;;
-;(autoload 'actionscript-mode "actionscript-mode-connors" "Major mode for actionscript." t)
-(add-to-list 'auto-mode-alist '("\\.as$" . javascript-mode))
+(add-hook 'java-mode-hook 
+          (function (lambda ()
+                      (make-local-variable 'write-contents-hooks)
+                      (add-hook 'write-contents-hooks 'untabify-at-save))))
 
 
 ;;  Rust
@@ -154,9 +168,9 @@
 
 ;;  XML
 ;;
-(defun my-nxml-mode-hook ()
-  (define-key nxml-mode-map "\M-h" 'backward-kill-word))
-(add-hook 'nxml-mode-hook 'my-nxml-mode-hook)
+(add-hook 'nxml-mode-hook
+	  (function (lambda ()
+		      (define-key nxml-mode-map "\M-h" 'backward-kill-word))))
 
 
 ;;  HTML
@@ -177,35 +191,43 @@
 	(e (set-marker (make-marker) end))
 	(a (if (stringp attrs) (concat " " attrs) "")))
     (if conv (html-convert-region begin end))
-    (goto-char b) (insert-string (concat "<" tag a ">"))
-    (goto-char e) (insert-string (concat "</" tag ">"))
+    (goto-char b) (insert (concat "<" tag a ">"))
+    (goto-char e) (insert (concat "</" tag ">"))
     (if save (goto-char e))
     b))
 
 (defun pre (begin end) (interactive "r")
   (let ((e (set-marker (make-marker) end)))
     (html-convert-region begin e)
-    (goto-char begin) (insert-string "<blockquote><pre>\n")
-    (goto-char e) (insert-string "</pre></blockquote>\n")))
+    (goto-char begin) (insert "<blockquote><pre>\n")
+    (goto-char e) (insert "</pre></blockquote>\n")))
 
 (setq html-mode-map (make-sparse-keymap))
-(define-key html-mode-map "\C-cs"
-  (function (lambda (b e) (interactive "r") (html-insert-tag b e "strong"))))
-(define-key html-mode-map "\C-cr"
-  (function (lambda (b e) (interactive "r") (html-insert-tag b e "span" "class=comment"))))
 (define-key html-mode-map "\C-cb"
   (function (lambda (b e) (interactive "r")
-	      (html-insert-tag
-	       (html-insert-tag b e "span" "class=bl")
-	       (point) "nobr"))))
+              (html-insert-tag (html-insert-tag b e "span" "class=bl")
+                               (point) "nobr"))))
+(define-key html-mode-map "\C-cr"
+  (function (lambda (b e) (interactive "r")
+              (html-insert-tag b e "span" "class=comment"))))
+(define-key html-mode-map "\C-cs"
+  (function (lambda (b e) (interactive "r")
+              (html-insert-tag b e "strong"))))
 (define-key html-mode-map "\C-cu"
-  (function (lambda (b e) (interactive "r") (html-insert-tag b e "u"))))
+  (function (lambda (b e) (interactive "r")
+              (html-insert-tag b e "u"))))
 (define-key html-mode-map "\C-ce"
-  (function (lambda (b e) (interactive "r") (html-insert-tag b e "em"))))
+  (function (lambda (b e) (interactive "r")
+              (html-insert-tag b e "em"))))
 (define-key html-mode-map "\C-cc"
-  (function (lambda (b e) (interactive "r") (html-insert-tag b e "code" nil t))))
+  (function (lambda (b e) (interactive "r")
+              (html-insert-tag b e "code" nil t))))
 (define-key html-mode-map "\C-ck"
-  (function (lambda (b e) (interactive "r") (html-insert-tag b e "kbd" nil t))))
+  (function (lambda (b e) (interactive "r")
+              (html-insert-tag b e "kbd" nil t))))
+(define-key html-mode-map "\C-cm"
+  (function (lambda (b e) (interactive "r")
+              (html-insert-tag b e "mark" nil t))))
 
 ;; timestamps
 (add-hook 'html-mode-hook
@@ -291,6 +313,9 @@ which will presumably insert an appropriate timestamp in the buffer."
       (funcall f m)
       (forward-line 1))))
 
+(defun uuid () (interactive)
+  (call-process "uuid" nil t nil))
+
 (defun eval-region-message (begin end) (interactive "r")
   (eval-region begin end) (message "Eval done."))
 (global-set-key "\C-x\C-e" 'eval-region-message)
@@ -315,6 +340,20 @@ which will presumably insert an appropriate timestamp in the buffer."
 
 (defun tmp () (interactive)
   (switch-to-buffer "*scratch*") (lisp-interaction-mode))
+
+(defun clipget () (interactive)
+       (call-process "clipget" nil t t))
+
+(defun scr () (interactive)
+  (set-mark-command nil)
+  (let ((s (with-current-buffer (get-buffer-create " *xclip*")
+	     (erase-buffer)
+	     (set-buffer-multibyte nil)
+	     (buffer-disable-undo)
+	     (auto-save-mode -1)
+	     (call-process "xclip" nil t t "-out")
+	     (buffer-substring-no-properties (point-min) (point-max)))))
+    (insert (decode-coding-string s 'utf-8))))
 
 (defun wc (x y) (interactive "r")
   (message "%d characters." (abs (- x y))))
@@ -389,6 +428,7 @@ which will presumably insert an appropriate timestamp in the buffer."
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(font-lock-comment-face ((((type tty pc) (class color) (background dark)) (:foreground "green"))))
+ '(font-lock-doc-face ((t (:inherit font-lock-comment-face))))
  '(font-lock-function-name-face ((((type tty) (class color)) (:foreground "cyan"))))
  '(font-lock-keyword-face ((((type tty) (class color)) (:foreground "yellow"))))
  '(font-lock-string-face ((((type tty) (class color)) (:foreground "plum1"))))
