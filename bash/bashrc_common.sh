@@ -112,8 +112,12 @@ function px {
 # i: show or search the local history.
 function i {
     if [ "$1" ]; then
-        grep "$@" $MYHISTFILE
+        grep -a "$@" $MYHISTFILE
     else
         tail -100 $MYHISTFILE
     fi
+}
+# tt: run a command with /usr/bin/time
+function tt {
+    command /usr/bin/time -v "$@";
 }
