@@ -65,7 +65,7 @@
 ;;
 (defun find-exist-file (fname) (interactive "fFind exist file: ")
   (if (car (file-attributes
-	    (file-chase-links (expand-file-name fname))))
+            (file-chase-links (expand-file-name fname))))
       (dired fname)
     (find-file fname)))
 (global-set-key "\C-x\C-f" 'find-exist-file)
@@ -113,15 +113,22 @@
 ;;  Python
 ;;
 (add-hook 'python-mode-hook
-	  (function (lambda ()
-		      (define-key python-mode-map "\C-m" 'newline-and-indent)
-		      (if (zerop (buffer-size))
-			  (insert-file "~/lib/python/python-template.py")))))
+          (function (lambda ()
+                      (define-key python-mode-map "\C-m" 'newline-and-indent)
+                      (if (zerop (buffer-size))
+                          (insert-file "~/lib/python/python-template.py")))))
 
 
 ;;  C/C++/ObjC
 ;;
 (defvar c-default-style nil)
+(c-add-style "me"
+             '("Java"
+               (c-offsets-alist . (
+                                   (arglist-cont . c-lineup-argcont)
+                                   (arglist-intro . +)
+                                   ))
+               ))
 ;(add-to-list 'auto-mode-alist '("\\.h$" . c++-mode))
 (add-to-list 'auto-mode-alist '("\\.m$" . objc-mode))
 (add-to-list 'c-default-style '(c-mode . "stroustrup"))
@@ -136,19 +143,11 @@
 (autoload 'csharp-mode "csharp-mode" "Major mode for editing C# code." t)
 (add-to-list 'auto-mode-alist '("\\.cs$" . csharp-mode))
 (add-to-list 'c-default-style '(csharp-mode . "me"))
-(c-add-style "me"
-             '("Java"
-               (c-basic-offset . 4)
-               (c-offsets-alist . (
-				   (arglist-cont . c-lineup-argcont)
-				   (arglist-intro . +)
-                                   ))
-               ))
 
 
 ;;  Java
 ;;
-(add-hook 'java-mode-hook 
+(add-hook 'java-mode-hook
           (function (lambda ()
                       (make-local-variable 'write-contents-hooks)
                       (add-hook 'write-contents-hooks 'untabify-at-save))))
@@ -169,8 +168,8 @@
 ;;  XML
 ;;
 (add-hook 'nxml-mode-hook
-	  (function (lambda ()
-		      (define-key nxml-mode-map "\M-h" 'backward-kill-word))))
+          (function (lambda ()
+                      (define-key nxml-mode-map "\M-h" 'backward-kill-word))))
 
 
 ;;  HTML
@@ -188,8 +187,8 @@
 
 (defun html-insert-tag (begin end tag &optional attrs conv save)
   (let ((b (set-marker (make-marker) begin))
-	(e (set-marker (make-marker) end))
-	(a (if (stringp attrs) (concat " " attrs) "")))
+        (e (set-marker (make-marker) end))
+        (a (if (stringp attrs) (concat " " attrs) "")))
     (if conv (html-convert-region begin end))
     (goto-char b) (insert (concat "<" tag a ">"))
     (goto-char e) (insert (concat "</" tag ">"))
@@ -205,8 +204,9 @@
 (setq html-mode-map (make-sparse-keymap))
 (define-key html-mode-map "\C-cb"
   (function (lambda (b e) (interactive "r")
-              (html-insert-tag (html-insert-tag b e "span" "class=bl")
-                               (point) "nobr"))))
+              (html-insert-tag
+               (html-insert-tag b e "span" "class=bl")
+               (point) "nobr"))))
 (define-key html-mode-map "\C-cr"
   (function (lambda (b e) (interactive "r")
               (html-insert-tag b e "span" "class=comment"))))
@@ -231,9 +231,9 @@
 
 ;; timestamps
 (add-hook 'html-mode-hook
-	  (function (lambda ()
-		      (set (make-local-variable 'electric-indent-mode) nil)
-		      (add-hook 'local-write-file-hooks 'html-update-timestamp))))
+          (function (lambda ()
+                      (set (make-local-variable 'electric-indent-mode) nil)
+                      (add-hook 'local-write-file-hooks 'html-update-timestamp))))
 (defvar html-helper-timestamp-start "<!-- hhmts start -->\n")
 (defvar html-helper-timestamp-end "<!-- hhmts end -->")
 (defun html-update-timestamp ()
@@ -244,16 +244,16 @@ which will presumably insert an appropriate timestamp in the buffer."
   (save-excursion
     (goto-char (point-max))
     (if (not (search-backward html-helper-timestamp-start nil t))
-	(message "timestamp delimiter start was not found")
+        (message "timestamp delimiter start was not found")
       (let ((ts-start (+ (point) (length html-helper-timestamp-start)))
-	    (ts-end (if (search-forward html-helper-timestamp-end nil t)
-			(- (point) (length html-helper-timestamp-end))
-		      nil)))
-	(if (not ts-end)
-	    (message "timestamp delimiter end was not found. Type C-c C-t to insert one.")
-	  (delete-region ts-start ts-end)
-	  (goto-char ts-start)
-	  (run-hooks 'html-helper-timestamp-hook)))))
+            (ts-end (if (search-forward html-helper-timestamp-end nil t)
+                        (- (point) (length html-helper-timestamp-end))
+                      nil)))
+        (if (not ts-end)
+            (message "timestamp delimiter end was not found. Type C-c C-t to insert one.")
+          (delete-region ts-start ts-end)
+          (goto-char ts-start)
+          (run-hooks 'html-helper-timestamp-hook)))))
   nil)
 (defun my-html-timestamp ()
   (insert "Last Modified: ")
@@ -277,6 +277,7 @@ which will presumably insert an appropriate timestamp in the buffer."
 (global-set-key "\C-s" 'isearch-forward-regexp)
 (global-set-key "\C-r" 'isearch-backward-regexp)
 (global-set-key "\M-l" 'goto-line)
+(global-set-key "\M-c" 'goto-char)
 (global-set-key "\C-xV" 'set-variable)
 (global-set-key "\M-\C-w" 'kill-ring-save)
 (global-set-key "\C-h\C-a" 'apropos)
@@ -313,9 +314,6 @@ which will presumably insert an appropriate timestamp in the buffer."
       (funcall f m)
       (forward-line 1))))
 
-(defun uuid () (interactive)
-  (call-process "uuid" nil t nil))
-
 (defun eval-region-message (begin end) (interactive "r")
   (eval-region begin end) (message "Eval done."))
 (global-set-key "\C-x\C-e" 'eval-region-message)
@@ -341,22 +339,25 @@ which will presumably insert an appropriate timestamp in the buffer."
 (defun tmp () (interactive)
   (switch-to-buffer "*scratch*") (lisp-interaction-mode))
 
+(defun wc (x y) (interactive "r")
+  (message "%d characters." (abs (- x y))))
+
+(defun uuid () (interactive)
+       (call-process "uuid" nil t nil))
+
 (defun clipget () (interactive)
        (call-process "clipget" nil t t))
 
-(defun scr () (interactive)
+(defun xclip () (interactive)
   (set-mark-command nil)
   (let ((s (with-current-buffer (get-buffer-create " *xclip*")
-	     (erase-buffer)
-	     (set-buffer-multibyte nil)
-	     (buffer-disable-undo)
-	     (auto-save-mode -1)
-	     (call-process "xclip" nil t t "-out")
-	     (buffer-substring-no-properties (point-min) (point-max)))))
+             (erase-buffer)
+             (set-buffer-multibyte nil)
+             (buffer-disable-undo)
+             (auto-save-mode -1)
+             (call-process "xclip" nil t t "-out")
+             (buffer-substring-no-properties (point-min) (point-max)))))
     (insert (decode-coding-string s 'utf-8))))
-
-(defun wc (x y) (interactive "r")
-  (message "%d characters." (abs (- x y))))
 
 
 ;;  Customization
@@ -373,8 +374,7 @@ which will presumably insert an appropriate timestamp in the buffer."
  '(js-indent-level 2)
  '(skk-cdb-large-jisyo "~/lib/skk/SKK-JISYO.L.cdb")
  '(skk-rom-kana-rule-list
-   (quote
-    (("hh" "h"
+   '(("hh" "h"
       ("ッ" . "っ"))
      ("mm" "m"
       ("ン" . "ん"))
@@ -418,9 +418,10 @@ which will presumably insert an appropriate timestamp in the buffer."
      ("z/" nil
       ("／" . "／"))
      ("z " nil
-      ("　" . "　")))))
+      ("　" . "　"))))
  '(skk-share-private-jisyo t)
- '(transient-mark-mode nil))
+ '(transient-mark-mode nil)
+ '(typescript-indent-switch-clauses nil))
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
