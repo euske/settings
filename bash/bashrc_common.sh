@@ -26,9 +26,6 @@ export LV="-Is -Ou"
 export PYTHONPATH=.:$HOME/lib/python
 export PYTHONSTARTUP=$HOME/lib/python/pythonrc.py
 export PYTHONIOENCODING=utf-8
-export LYNX_CFG=$HOME/lib/rc/lynx.cfg
-export LYNX_LSS=$HOME/lib/rc/lynx.lss
-export CMAP_PATH=$HOME/lib/python/pdfminer/cmap
 export RSYNC_BACKUP_BASE='.old'
 export RSYNC_PATTERN
 RSYNC_PATTERN='--exclude NOBACKUP/ --exclude INACTIVE/ --exclude LOCAL/ --exclude local/ --exclude tmp/'

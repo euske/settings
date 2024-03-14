@@ -65,13 +65,17 @@ function cpi { command cp -i "$@"; }
 function g { LC_CTYPE=C command grep -i "$@"; }
 function r { LC_CTYPE=C command grep -ir "$@"; }
 function G { LC_CTYPE=C command grep "$@"; }
+# git
+alias gs='git status'
+alias gd='git diff'
+alias gl='git glog'
 # hd: hex dump.
 function hd {
     od -Ax -tx1z -v "$@";
 }
 # xargsn: properly handle filenames with spaces.
 function xargsn {
-    xargs -d '\n' "$@";
+    xargs -E '\n' "$@";
 }
 # l: less for a file, ls for a directory.
 function l {
@@ -88,7 +92,7 @@ function ff {
     local path=${1:-.}
     shift
     find "$path" \
-         '(' -name '.?*' -o -name CVS -o -name tmp ')' -prune -false -o -type f "$@"
+         '(' -name '.?*' -o -name tmp ')' -prune -false -o -type f "$@"
 }
 # f: find files by name (case insensitive)
 function f {
@@ -108,13 +112,12 @@ function F {
 }
 # listcodes: enumerate source codes.
 function listcodes {
-    ff "${1:-.}" '(' \
-         -name '*.c' -o -name '*.cc' -o -name '*.C' -o -name '*.cpp' -o \
-         -name '*.h' -o -name '*.H' -o -name '*.hpp' -o \
-         -name '*.sh' -o -name '*.rc' -o -name '*.py' -o -name '*.el' -o \
-         -name '*.java' -o -name '*.jsp' -o -name '*.cs' -o \
-         -name '*.as' -o -name '*.js' -o -name '*.ts' \
-         ')';
+    ff "${1:-.}" \
+	-name 'Makefile' -o \
+	-name 'README' -o \
+	-name '*.*' -a '!' '(' \
+         -name '*.o' -o -name '*.obj' -o -name '*.db' \
+        ')';
 }
 # listtexts: enumerate text files.
 function listtexts {
