@@ -66,9 +66,11 @@ function g { LC_CTYPE=C command grep -i "$@"; }
 function r { LC_CTYPE=C command grep -ir "$@"; }
 function G { LC_CTYPE=C command grep "$@"; }
 # git
-alias gs='git status'
-alias gd='git diff'
-alias gl='git glog'
+function ga { command git add "$@"; }
+function gc { command git checkout "$@"; }
+function gs { command git status "$@"; }
+function gd { command git diff "$@"; }
+function gl { command git glog "$@"; }
 # hd: hex dump.
 function hd {
     od -Ax -tx1z -v "$@";
