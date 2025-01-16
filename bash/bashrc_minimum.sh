@@ -28,8 +28,6 @@ unset LANG
 export PAGER=less
 export EDITOR=vi
 export LESS='-F -R -X -K -i -P ?f%f:(stdin).  ?lb%lb?L/%L..  [?eEOF:?pb%pb\%..]'
-export RSYNC_RSH=ssh
-export CVS_RSH=ssh
 
 # Terminal settings.
 #eval `SHELL=sh tset -sQI`
@@ -94,7 +92,7 @@ function ff {
     local path=${1:-.}
     shift
     find "$path" \
-         '(' -name '.?*' -o -name tmp ')' -prune -false -o -type f "$@"
+         '(' -name '.?*' -o -name tmp -o -name node_modules -o -name build ')' -prune -false -o -type f '(' "$@" ')'
 }
 # f: find files by name (case insensitive)
 function f {
@@ -115,10 +113,10 @@ function F {
 # listcodes: enumerate source codes.
 function listcodes {
     ff "${1:-.}" \
-	-name 'Makefile' -o \
+	'(' -name 'Makefile' -o \
 	-name 'README' -o \
-	-name '*.*' -a '!' '(' \
-         -name '*.o' -o -name '*.obj' -o -name '*.db' \
+	-name '*.*' ')' -a '!' '(' -type d -o \
+         -name '*.o' -o -name '*.obj' -o -name '*.db' -o -name '*.class' \
         ')';
 }
 # listtexts: enumerate text files.

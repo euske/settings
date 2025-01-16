@@ -25,11 +25,6 @@ fi
 export LV="-Is -Ou"
 export PYTHONPATH=.:$HOME/lib/python
 export PYTHONSTARTUP=$HOME/lib/python/pythonrc.py
-export PYTHONIOENCODING=utf-8
-export RSYNC_BACKUP_BASE='.old'
-export RSYNC_PATTERN
-RSYNC_PATTERN='--exclude NOBACKUP/ --exclude INACTIVE/ --exclude LOCAL/ --exclude local/ --exclude tmp/'
-RSYNC_PATTERN=$RSYNC_PATTERN' --include *.obj --include *.Z --exclude *.o'
 
 # Terminal settings.
 if [ "linux" = "$TERM" ]; then
